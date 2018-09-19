@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="https://www.suny.edu/timeclock/ws" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="https://www.suny.edu/timeclock/ws" targetNamespace="https://www.suny.edu/timeclock/ws">
+    <wsdl:types>
+        <xs:schema xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:tc="https://www.suny.edu/timeclock/ws" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" jxb:version="1.0" targetNamespace="https://www.suny.edu/timeclock/ws">
+            <xs:element name="punchtimeRequest">
+                <xs:annotation>
+                    <xs:documentation>Request for posting time clocked.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="punchtimeId" type="tc:idType">
+                            <xs:annotation>
+                                <xs:documentation>Id of this time clock transaction in the format of deviceLocationId(2 digits) + sunyId(up to 8 digits) + DDHHMM 
+                  	(example:deviceLocationId = 01, sunyId = 12345 and the time clock is August 16 2pm, then the transactionId will be 0112345161400)</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="employeeTime" type="tc:employeeTime">
+                            <xs:annotation>
+                                <xs:documentation>employee time clock</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="punchtimeResponse">
+                <xs:annotation>
+                    <xs:documentation>Response with transaction status.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="punchtimeId" type="tc:idType">
+                            <xs:annotation>
+                                <xs:documentation>Id received in the time clock transaction request.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="punchTypeAccepted" type="tc:punchType">
+                            <xs:annotation>
+                                <xs:documentation>Punch type accepted.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element minOccurs="0" name="error" type="tc:error">
+                            <xs:annotation>
+                                <xs:documentation>Business error code/message returned.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:simpleType name="idType">
+                <xs:restriction base="xs:string">
+                    <xs:minLength value="9"/>
+                    <xs:maxLength value="16"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType name="punchType">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="IN"/>
+                    <xs:enumeration value="OUT"/>
+                    <xs:enumeration value="NONE"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="error">
+                <xs:sequence>
+                    <xs:element name="errorCode">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:pattern value="001|002|003"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="errorMessage">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Employee does not exist in the TimeAttendance system."/>
+                                <xs:enumeration value="Employee does not have an effective work schedule."/>
+                                <xs:enumeration value="Duplicate timestamp found."/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="employeeTime">
+                <xs:sequence>
+                    <xs:element name="sunyId">
+                        <xs:annotation>
+                            <xs:documentation>Employee's suny ID.</xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:integer">
+                                <xs:minInclusive value="1"/>
+                                <xs:maxInclusive value="9999999999"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="sunyCampusCode">
+                        <xs:annotation>
+                            <xs:documentation>Employee's suny campus code</xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:pattern value="[2][8][0-9][0-9][0]"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="punchTime" type="xs:dateTime">
+                        <xs:annotation>
+                            <xs:documentation>Employee's punch time in the format of YYYY-MM-DDThh:mm:ss</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="punchtimeRequest">
+        <wsdl:part element="tns:punchtimeRequest" name="punchtimeRequest"/>
+    </wsdl:message>
+    <wsdl:message name="punchtimeResponse">
+        <wsdl:part element="tns:punchtimeResponse" name="punchtimeResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="Punchtime">
+        <wsdl:operation name="punchtime">
+            <wsdl:input message="tns:punchtimeRequest" name="punchtimeRequest"/>
+            <wsdl:output message="tns:punchtimeResponse" name="punchtimeResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="PunchtimeSoap11" type="tns:Punchtime">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="punchtime">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="punchtimeRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="punchtimeResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="PunchtimeService">
+        <wsdl:port binding="tns:PunchtimeSoap11" name="PunchtimeSoap11">
+            <soap:address location="http://w7ehpoit025.sysadmin.suny.edu:7001/timeclock/ws/punchtime"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
