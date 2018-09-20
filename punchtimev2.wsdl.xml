@@ -137,7 +137,7 @@
     </wsdl:binding>
     <wsdl:service name="PunchtimeService">
         <wsdl:port binding="tns:PunchtimeSoap11" name="PunchtimeSoap11">
-            <soap:address location="http://w7ehpoit025.sysadmin.suny.edu:7001/timeclock/ws/punchtime"/>
+            <soap:address location="http://localhost:2545/Punchtime.svc"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
